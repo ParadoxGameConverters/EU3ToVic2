@@ -43,6 +43,8 @@ bool DoesFileExist(const std::string& path);
 
 // Returns a formatted string describing the last error on the WinAPI.
 std::string GetLastWindowsError();
+std::wstring convertUTF8ToUTF16(const std::string& UTF8);
+std::string convertUTF16ToUTF8(const std::wstring& UTF16);
 
 } // namespace WinUtils
 

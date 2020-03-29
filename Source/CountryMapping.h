@@ -27,8 +27,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 #include <string>
 #include <vector>
 
-#include <boost/bimap.hpp>
-
 class EU3World;
 class V2World;
 
@@ -63,7 +61,8 @@ private:
 	static void LogMapping(const std::string& EU3Tag, const std::string& V2Tag, const std::string& reason);
 
 	std::map<std::string, std::vector<std::string>> EU3TagToV2TagsRules;
-	boost::bimap<std::string, std::string> EU3TagToV2TagMap;
+	std::map<std::string, std::string> EU3TagToV2TagMap;
+	std::map<std::string, std::string> V2TagToEU3TagMap;
 };
 
 #endif

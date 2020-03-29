@@ -24,12 +24,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 #include "EU3Localisation.h"
 #include <fstream>
 #include <vector>
-#include <Windows.h>
 #include <boost/tokenizer.hpp>
 #include <iterator>
 using namespace std;
 using namespace boost;
 
+#include <filesystem>
+namespace fs = std::filesystem;
+#include <set>
 
 
 
@@ -94,23 +96,17 @@ void EU3Localisation::ReadFromFile(const std::string& fileName)
 void EU3Localisation::ReadFromAllFilesInFolder(const std::string& folderPath)
 {
 	// Get all files in the folder.
-	std::vector<std::string> fileNames;
-	WIN32_FIND_DATA findData;	// the file data
-	HANDLE findHandle = FindFirstFile((folderPath + "\\*").c_str(), &findData);	// the find handle
-	if (findHandle == INVALID_HANDLE_VALUE)
+	set<std::string> fileNames;
+	if (!fs::exists(fs::u8path(folderPath))) return;
+	if (fs::is_empty(fs::u8path(folderPath))) return;
+	for (auto& p : fs::directory_iterator(fs::u8path(folderPath)))
 	{
-		return;
-	}
-	do
-	{
-		if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		if (!p.is_directory())
 		{
-			fileNames.push_back(findData.cFileName);
+			fileNames.insert(p.path().filename().string());
 		}
-	} while (FindNextFile(findHandle, &findData) != 0);
-	FindClose(findHandle);
 
-	// Read all these files.
+	}
 	for (const auto& fileName : fileNames)
 	{
 		ReadFromFile(folderPath + '\\' + fileName);

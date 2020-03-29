@@ -18,7 +18,7 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
-
+#define WIN32_LEAN_AND_MEAN
 
 #include <io.h>
 #include <stdexcept>
@@ -46,7 +46,7 @@ int ConvertEU3ToV2(const std::string& EU3SaveFileName)
 	Object*	obj;				// generic object
 	ifstream	read;				// ifstream for reading files
 
-	char curDir[MAX_PATH];
+	wchar_t curDir[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, curDir);
 	LOG(LogLevel::Debug) << "Current directory is " << curDir;
 
