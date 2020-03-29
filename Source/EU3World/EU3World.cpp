@@ -208,9 +208,9 @@ void EU3World::readCommonCountries(istream& in, const std::string& rootPath)
 
 				// The country file name is all the text after the equals sign (possibly in quotes).
 				size_t equalPos = countryLine.find('=', 3);
-				size_t beginPos = countryLine.find_first_not_of(' ', equalPos + 1);
-				size_t endPos = countryLine.find_last_not_of(' ') + 1;
-				std::string fileName = countryLine.substr(beginPos, endPos - beginPos);
+				size_t beginPos = countryLine.find_first_of('\"', equalPos + 1);
+				size_t endPos = countryLine.find_last_of('\"');
+				std::string fileName = countryLine.substr(beginPos + 1, endPos - beginPos - 1);
 				if (fileName.front() == '"' && fileName.back() == '"')
 				{
 					fileName = fileName.substr(1, fileName.size() - 2);

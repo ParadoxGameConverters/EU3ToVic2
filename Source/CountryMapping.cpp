@@ -93,6 +93,7 @@ bool CountryMapping::ReadRules(const std::string& fileName)
 void CountryMapping::CreateMapping(const EU3World& srcWorld, const V2World& destWorld)
 {
 	EU3TagToV2TagMap.clear();
+	V2TagToEU3TagMap.clear();
 
 	char generatedV2TagPrefix = 'X'; // single letter prefix
 	int generatedV2TagSuffix = 0; // two digit suffix
@@ -120,10 +121,11 @@ void CountryMapping::CreateMapping(const EU3World& srcWorld, const V2World& dest
 			for (vector<string>::const_iterator j = possibleV2Tags.begin(); j != possibleV2Tags.end() && !mapped; ++j)
 			{
 				const std::string& V2Tag = *j;
-				if (V2Countries.find(V2Tag) != V2Countries.end() && EU3TagToV2TagMap.right.find(V2Tag) == EU3TagToV2TagMap.right.end())
+				if (V2Countries.find(V2Tag) != V2Countries.end() && V2TagToEU3TagMap.find(V2Tag) == V2TagToEU3TagMap.end())
 				{
 					mapped = true;
-					EU3TagToV2TagMap.left.insert(make_pair(EU3Tag, V2Tag));
+					EU3TagToV2TagMap.insert(make_pair(EU3Tag, V2Tag));
+					V2TagToEU3TagMap.insert(make_pair(V2Tag, EU3Tag));
 					LogMapping(EU3Tag, V2Tag, "default V2 country");
 				}
 			}
@@ -132,10 +134,11 @@ void CountryMapping::CreateMapping(const EU3World& srcWorld, const V2World& dest
 				for (vector<string>::const_iterator j = possibleV2Tags.begin(); j != possibleV2Tags.end() && !mapped; ++j)
 				{
 					const std::string& V2Tag = *j;
-					if (EU3TagToV2TagMap.right.find(V2Tag) == EU3TagToV2TagMap.right.end())
+					if (V2TagToEU3TagMap.find(V2Tag) == V2TagToEU3TagMap.end())
 					{
 						mapped = true;
-						EU3TagToV2TagMap.left.insert(make_pair(EU3Tag, V2Tag));
+						EU3TagToV2TagMap.insert(make_pair(EU3Tag, V2Tag));
+						V2TagToEU3TagMap.insert(make_pair(V2Tag, EU3Tag));
 						LogMapping(EU3Tag, V2Tag, "mapping rule, not a V2 country");
 					}
 				}
@@ -149,7 +152,8 @@ void CountryMapping::CreateMapping(const EU3World& srcWorld, const V2World& dest
 			ostringstream generatedV2TagStream;
 			generatedV2TagStream << generatedV2TagPrefix << setfill('0') << setw(2) << generatedV2TagSuffix;
 			string V2Tag = generatedV2TagStream.str();
-			EU3TagToV2TagMap.left.insert(make_pair(EU3Tag, V2Tag));
+			EU3TagToV2TagMap.insert(make_pair(EU3Tag, V2Tag));
+			V2TagToEU3TagMap.insert(make_pair(V2Tag, EU3Tag));
 			LogMapping(EU3Tag, V2Tag, "generated tag");
 			// Prepare the next generated tag.
 			++generatedV2TagSuffix;
@@ -172,8 +176,8 @@ const std::string& CountryMapping::GetV2Tag(const std::string& EU3Tag) const
 		return V2RebelTag;
 	}
 
-	boost::bimap<std::string, std::string>::left_const_iterator findIter = EU3TagToV2TagMap.left.find(EU3Tag);
-	if (findIter != EU3TagToV2TagMap.left.end())
+	const auto& findIter = EU3TagToV2TagMap.find(EU3Tag);
+	if (findIter != EU3TagToV2TagMap.end())
 	{
 		return findIter->second;
 	}
@@ -186,8 +190,8 @@ const std::string& CountryMapping::GetV2Tag(const std::string& EU3Tag) const
 
 const std::string& CountryMapping::GetEU3Tag(const std::string& V2Tag) const
 {
-	boost::bimap<std::string, std::string>::right_const_iterator findIter = EU3TagToV2TagMap.right.find(V2Tag);
-	if (findIter != EU3TagToV2TagMap.right.end())
+	const auto& findIter = V2TagToEU3TagMap.find(V2Tag);
+	if (findIter != V2TagToEU3TagMap.end())
 	{
 		return findIter->second;
 	}

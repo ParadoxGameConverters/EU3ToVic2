@@ -18,7 +18,7 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
-
+#define WIN32_LEAN_AND_MEAN
 
 #include "V2World.h"
 #include <Windows.h>
@@ -66,74 +66,38 @@ typedef struct fileWithCreateTime
 
 V2World::V2World(vector<pair<string, string>> minorities)
 {
-	LOG(LogLevel::Info) << "Importing provinces";
-
 	struct _finddata_t	provinceFileData;
 	intptr_t					fileListing = NULL;
 	list<string>			directories;
 	directories.push_back("");
 	struct _stat st;
-	if (_stat(".\\blankMod\\output\\history\\provinces\\", &st) == 0)
+	while (directories.size() > 0)
 	{
-		while (directories.size() > 0)
+		if ((fileListing = _findfirst((Configuration::getV2Path() + "\\history\\provinces" + directories.front() + "\\*.*").c_str(), &provinceFileData)) == -1L)
 		{
-			if ((fileListing = _findfirst((string(".\\blankMod\\output\\history\\provinces") + directories.front() + "\\*.*").c_str(), &provinceFileData)) == -1L)
-			{
-				LOG(LogLevel::Error) << "Could not open directory .\\blankMod\\output\\history\\provinces" << directories.front() << "\\*.*";
-				exit(-1);
-			}
-
-			do
-			{
-				if (strcmp(provinceFileData.name, ".") == 0 || strcmp(provinceFileData.name, "..") == 0)
-				{
-					continue;
-				}
-				if (provinceFileData.attrib & _A_SUBDIR)
-				{
-					string newDirectory = directories.front() + "\\" + provinceFileData.name;
-					directories.push_back(newDirectory);
-				}
-				else
-				{
-					V2Province* newProvince = new V2Province(directories.front() + "\\" + provinceFileData.name);
-					provinces.insert(make_pair(newProvince->getNum(), newProvince));
-				}
-			} while (_findnext(fileListing, &provinceFileData) == 0);
-			_findclose(fileListing);
-			directories.pop_front();
+			LOG(LogLevel::Error) << "Could not open directory " << Configuration::getV2Path() << "\\history\\provinces" << directories.front() << "\\*.*";
+			exit(-1);
 		}
-	}
-	else
-	{
-		while (directories.size() > 0)
+
+		do
 		{
-			if ((fileListing = _findfirst((Configuration::getV2Path() + "\\history\\provinces" + directories.front() + "\\*.*").c_str(), &provinceFileData)) == -1L)
+			if (strcmp(provinceFileData.name, ".") == 0 || strcmp(provinceFileData.name, "..") == 0)
 			{
-				LOG(LogLevel::Error) << "Could not open directory " << Configuration::getV2Path() << "\\history\\provinces" << directories.front() << "\\*.*";
-				exit(-1);
+				continue;
 			}
-
-			do
+			if (provinceFileData.attrib & _A_SUBDIR)
 			{
-				if (strcmp(provinceFileData.name, ".") == 0 || strcmp(provinceFileData.name, "..") == 0)
-				{
-					continue;
-				}
-				if (provinceFileData.attrib & _A_SUBDIR)
-				{
-					string newDirectory = directories.front() + "\\" + provinceFileData.name;
-					directories.push_back(newDirectory);
-				}
-				else
-				{
-					V2Province* newProvince = new V2Province(directories.front() + "\\" + provinceFileData.name);
-					provinces.insert(make_pair(newProvince->getNum(), newProvince));
-				}
-			} while (_findnext(fileListing, &provinceFileData) == 0);
-			_findclose(fileListing);
-			directories.pop_front();
-		}
+				string newDirectory = directories.front() + "\\" + provinceFileData.name;
+				directories.push_back(newDirectory);
+			}
+			else
+			{
+				V2Province* newProvince = new V2Province(directories.front() + "\\" + provinceFileData.name);
+				provinces.insert(make_pair(newProvince->getNum(), newProvince));
+			}
+		} while (_findnext(fileListing, &provinceFileData) == 0);
+		_findclose(fileListing);
+		directories.pop_front();
 	}
 
 	// Get province names
